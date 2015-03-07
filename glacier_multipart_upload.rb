@@ -2,7 +2,7 @@
 require 'openssl'
 require 'aws-sdk'
 # For archiving any file to AWS Glacier
-# execute with ruby glacier_multipart_upload.rb /path/to/file
+# execute with ruby glacier_multipart_upload.rb /path/to/file 'Your New Archive Description'
 
 ACCOUNT_ID = '' # AWS account id
 AWS_ACCESS_KEY_ID = '' # AWS Access Key
@@ -14,6 +14,7 @@ REGION = 'us-east-1' # or other AWS region
 MAX_SEGMENT_FAILS = 10 # number of times we'll loop and retry any segment that fails
 
 @archive_path = ARGV[0]
+@archive_description = ARGV[1] || File.basename(@archive_path)
 @archive_size = File.size(@archive_path)
 @segments_array = Array.new((@archive_size.to_f/SEGMENT_SIZE).ceil) { 0 }
 @tree_hash = Aws::TreeHash.new
@@ -73,7 +74,7 @@ end
 
 initiate_resp = @glacier.initiate_multipart_upload(
     vault_name: VAULT_IDENTIFIER,
-    archive_description: "iPhoto Backup #{Time.now}",
+    archive_description: @archive_description,
     part_size: SEGMENT_SIZE
   )
 
@@ -101,7 +102,7 @@ rescue => e
 end
 
 puts completion_resp.inspect
-puts "iPhoto archive uploaded"
+puts "Glacier archive uploaded"
 
 # end main script #  
 
