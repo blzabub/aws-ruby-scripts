@@ -5,9 +5,10 @@ require 'aws-sdk'
 # and fix by uploading just those chunks
 # combines the diagnostic and fix upload scripts into one
 
+# execute with ruby glacier_multiupload_repair.rb 'aws-upload-id'
 
 # set these values:
-UPLOAD_ID = '' # enter aws upload id here
+UPLOAD_ID = ARGV[0] || '' # enter aws upload id here if not passing in as argument
 @archive_size = 123 # remember to set actual file size here in bytes
 #
 
