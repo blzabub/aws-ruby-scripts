@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-require 'openssl'
+# make sure the gem is installed first with: gem install 'aws-sdk' 
 require 'aws-sdk'
 # For archiving any file to AWS Glacier
 # execute with ruby glacier_multipart_upload.rb /path/to/file 'Your New Archive Description'
@@ -17,7 +17,7 @@ MAX_SEGMENT_FAILS = 10 # number of times we'll loop and retry any segment that f
 @archive_description = ARGV[1] || File.basename(@archive_path)
 @archive_size = File.size(@archive_path)
 @segments_array = Array.new((@archive_size.to_f/SEGMENT_SIZE).ceil) { 0 }
-@tree_hash = Aws::TreeHash.new
+
 @glacier = Aws::Glacier::Client.new({
     access_key_id: AWS_ACCESS_KEY_ID,
     secret_access_key: AWS_SECRET_ACCESS_KEY,
@@ -49,7 +49,6 @@ def upload_segments
       end
     else
       @segments_array[segment_num] = COMPLETED
-      @tree_hash.hashes.concat(upload_resp.context[:tree_hash].hashes)
       puts "completed upload of segment #{segment_num}"
       puts "#{num_completed_segments} of #{num_segments} completed"
       puts "--- #{(num_completed_segments/num_segments)*100}% completed ----------------------------"
@@ -70,7 +69,13 @@ def num_completed_segments
 end
 
 
-# begin main script section
+### begin main script section
+
+# calculate tree hash of archive to upload
+puts "== calculating archive tree hash checksum =="
+@tree_hash = Aws::TreeHash.new
+@tree_hash.update(file.read(1024*1024)) until file.eof?
+puts "== archive tree hash checksum complete =="
 
 initiate_resp = @glacier.initiate_multipart_upload(
     vault_name: VAULT_IDENTIFIER,
@@ -83,7 +88,7 @@ puts "upload_id: #{@upload_id}" # if job fails, having this will help
 
 tries = 1
 while segments_to_upload? do
-  "*** Beginning Loop number #{tries} of #{MAX_SEGMENT_FAILS} loops. ***"
+  "== Beginning Loop number #{tries} of #{MAX_SEGMENT_FAILS} loops. =="
   upload_segments
   tries += 1
 end
@@ -99,17 +104,16 @@ rescue => e
   puts e.inspect
   puts "file size: #{@archive_size}"
   puts "segments array: #{@segments_array.inspect}"
+  puts "**** UNSUCCESSFUL DUE TO ERRORS ****"
+else
+  puts completion_resp.inspect
+  puts "location: #{completion_resp.location}"
+  puts "checksum: #{completion_resp.checksum}"
+  puts "archive_id: #{completion_resp.archive_id}"
+  puts "==== ARCHIVE CREATION SUCCEEDED ===="
 end
 
-puts completion_resp.inspect
-puts "Glacier archive uploaded"
+
+
 
 # end main script #  
-
-# tree hash can be calculated manually like this:
-=begin
-  file = File.open('/path/to/file')
-  tree_hash = Aws::TreeHash.new
-  tree_hash.update(file.read(1024x1024)) until file.eof?
-  tree_hash.digest
-=end
