@@ -51,7 +51,7 @@ def upload_segments
       @segments_array[segment_num] = COMPLETED
       puts "completed upload of segment #{segment_num}"
       puts "#{num_completed_segments} of #{num_segments} completed"
-      puts "--- #{(num_completed_segments/num_segments)*100}% completed ----------------------------"
+      puts "--- #{percentage_completed}% completed ----------------------------"
     end
   end
 end
@@ -68,12 +68,17 @@ def num_completed_segments
   @segments_array.count(-1)
 end
 
+def percentage_completed
+  (num_completed_segments/num_segments) * 100
+end
+
 
 ### begin main script section
 
 # calculate tree hash of archive to upload
 puts "== calculating archive tree hash checksum =="
 @tree_hash = Aws::TreeHash.new
+file = File.open(@archive_path)
 @tree_hash.update(file.read(1024*1024)) until file.eof?
 puts "== archive tree hash checksum complete =="
 
