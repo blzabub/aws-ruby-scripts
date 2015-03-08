@@ -1,5 +1,4 @@
 #!/usr/bin/env ruby
-require 'openssl'
 require 'aws-sdk'
 # use this to figure out what chunks are missing in a failed multipart upload process
 # and fix by uploading just those chunks
