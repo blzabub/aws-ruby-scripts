@@ -1,23 +1,24 @@
 #!/usr/bin/env ruby
 require 'aws-sdk'
+require_relative 'glacier_credentials'
 # use this to figure out what chunks are missing in a failed multipart upload process
 # and fix by uploading just those chunks
 # combines the diagnostic and fix upload scripts into one
 
-# execute with ruby glacier_multiupload_repair.rb 'aws-upload-id'
+# execute with ruby glacier_multiupload_repair.rb 'aws-upload-id' 'file size in bytes'
 
 # set these values:
 UPLOAD_ID = ARGV[0] || '' # enter aws upload id here if not passing in as argument
-@archive_size = 123 # remember to set actual file size here in bytes
+@archive_size = ARGV[1] || 123 # remember to set actual file size here in bytes
 #
 
-ACCOUNT_ID = ''
-AWS_ACCESS_KEY_ID = ''
-AWS_SECRET_ACCESS_KEY = ''
+ACCOUNT_ID = '' unless defined? ACCOUNT_ID
+AWS_ACCESS_KEY_ID = '' unless defined? AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY = '' unless defined? AWS_SECRET_ACCESS_KEY
 SEGMENT_SIZE = 1024 * 1024 * 64 # 64 Megabyte segments
 COMPLETED = -1
 VAULT_IDENTIFIER = ''
-REGION = 'us-east-1'
+REGION = '' unless defined? REGION
 
 @segments_array = Array.new((@archive_size.to_f/SEGMENT_SIZE).ceil) { 0 }
 @aws_reported_segments = []

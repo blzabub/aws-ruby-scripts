@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 require 'aws-sdk'
+require_relative 'glacier_credentials'
+
 # use this script to cancel all incomplete multipart upload jobs
 
 # execute with ruby glacier_cancel_all_multipart_jobs.rb 'Vault Name'
@@ -8,10 +10,10 @@ require 'aws-sdk'
 VAULT_IDENTIFIER = ARGV[0] || '' # name of vault, not *arn* name
 #
 
-ACCOUNT_ID = ''
-AWS_ACCESS_KEY_ID = ''
-AWS_SECRET_ACCESS_KEY = ''
-REGION = 'us-east-1'
+ACCOUNT_ID = '' unless defined? ACCOUNT_ID
+AWS_ACCESS_KEY_ID = '' unless defined? AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY = '' unless defined? AWS_SECRET_ACCESS_KEY
+REGION = '' unless defined? REGION
 
 @glacier = Aws::Glacier::Client.new({
   access_key_id: AWS_ACCESS_KEY_ID,

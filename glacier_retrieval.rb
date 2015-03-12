@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require 'aws-sdk'
+require_relative 'glacier_credentials'
 # use this script to download an AWS Glacier archive. The script will download it
 # in a single request if the archive is smaller than the segment size set. If it
 # is larger then it will download it in segments and reassemble them.
@@ -12,15 +13,15 @@ require 'aws-sdk'
 JOB_ID = ARGV[0] || '' # enter aws job id here if not passing in as argument
 RESTORE_PATH = ARGV[1] || '' # enter a local path to save the file if not passing in as an argument
 TEMP_LOCATION = "/tmp/#{JOB_ID}/"
-ACCOUNT_ID = '' # AWS account id
-AWS_ACCESS_KEY_ID = '' # AWS Access Key
-AWS_SECRET_ACCESS_KEY = '' # AWS Secret Access Key
+ACCOUNT_ID = '' unless defined? ACCOUNT_ID # AWS account id
+AWS_ACCESS_KEY_ID = '' unless defined? AWS_ACCESS_KEY_ID# AWS Access Key
+AWS_SECRET_ACCESS_KEY = '' unless defined? AWS_SECRET_ACCESS_KEY # AWS Secret Access Key
 VAULT_IDENTIFIER = '' # AWS Vault Name, *not vault ARN*
 #
 
 SEGMENT_SIZE = 1024 * 1024 * 64 # 64 Megabyte segments, or any of 1MB, 2MB, 4MB, 8MB, 16MB, 32MB...4GB
 COMPLETED = -1
-REGION = 'us-east-1' # or other AWS region
+REGION = '' unless defined? REGION # or other AWS region
 MAX_SEGMENT_FAILS = 10 # number of times we'll loop and retry any segment that fails
 
 @glacier = Aws::Glacier::Client.new({

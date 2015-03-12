@@ -1,21 +1,22 @@
 #!/usr/bin/env ruby
 require 'aws-sdk'
+require_relative 'glacier_credentials'
 # use this script to request a retrieval job from AWS Glacier
 # retrieval jobs usually complete in about 4 hours, after which you
 # can run the glacier_multipart_retrieval.rb script to actually download
 # and restore the archive
 
-# execute with ruby glacier_initiate_retrieval.rb aws_archive_id
+# execute with ruby glacier_initiate_retrieval.rb aws_archive_id 'Vault Name'
 
 # set these values:
 ARCHIVE_ID = ARGV[0] || '' # enter aws archive id here if not passing in as argument
-VAULT_IDENTIFIER = '' # name of vault, not *arn* name
+VAULT_IDENTIFIER = ARGV[1] || '' # name of vault, not *arn* name
 #
 
-ACCOUNT_ID = ''
-AWS_ACCESS_KEY_ID = ''
-AWS_SECRET_ACCESS_KEY = ''
-REGION = 'us-east-1'
+ACCOUNT_ID = '' unless defined? ACCOUNT_ID
+AWS_ACCESS_KEY_ID = '' unless defined? AWS_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY = '' unless defined? AWS_SECRET_ACCESS_KEY
+REGION = '' unless defined? REGION
 
 @glacier = Aws::Glacier::Client.new({
   access_key_id: AWS_ACCESS_KEY_ID,
